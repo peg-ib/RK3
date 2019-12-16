@@ -1,9 +1,11 @@
 ﻿#include <iostream>
+#include <cmath>
 #include <ctime>
 #include <random>
 #include <vector>
 #include <iomanip>
-#include "math.h"
+#include <string>
+//Структура для создания особи
 struct point
 {
 	double x;
@@ -22,21 +24,24 @@ struct point
 		fit = fit_;
 	}
 };
+//Заданная функция
 double function(double x, double y)
 {
 	return cos(x) * cos(y) * exp(-(x * x) - (y * y));//(-2,2) x (-2,2)
 }
-double Random(double min, double max)
+//Функция для генерации случайных чисел
+double Random(double left, double right)
 {
-	return (double)(rand()) / RAND_MAX * (max - min) + min;
+	return (double)(rand()) / RAND_MAX * (right - left) + left;
 }
+//Функция мутации
 std::vector<point> mutation(std::vector<point> population)
 {
 	double delta = 0.05;
 	int i = rand() % 4;
-	if (Random(0, 1) <= 0.5)
+	if (Random(0, 1) <= 0.5)//x или y
 	{
-		if (Random(0, 1) <= 0.5)
+		if (Random(0, 1) <= 0.5)//+delta или -delta
 		{
 			population[i].x += delta;
 		}
@@ -47,7 +52,7 @@ std::vector<point> mutation(std::vector<point> population)
 	}
 	else
 	{
-		if (Random(0, 1) <= 0.5)
+		if (Random(0, 1) <= 0.5)//+delta или -delta
 		{
 			population[i].y += delta;
 		}
@@ -58,42 +63,48 @@ std::vector<point> mutation(std::vector<point> population)
 	}
 	return population;
 }
-void print(std::vector<point> v, int N, double fit_max, double fit_sum)
+//Функция для вывода значений
+void print(std::vector<point> v, int N, double fit_max, double fit_sum, bool flag)
 {
 	double fit_mean;
-	fit_mean = fit_sum / 4;
+	std::string flag_s;
+	if (flag == 1)
+		flag_s = "+  ";
+	else
+		flag_s = "-  ";
+	fit_mean = fit_sum / 4;//Подсчет среднего значения
 	for (int i = 0; i < v.size(); i++)
 	{
 		if (N == 0)
 		{
 			if (i == 0)
 			{
-				std::cout << "|" << std::setw(11) << "(исходное)" << "|" << std::fixed << std::setprecision(6) << std::setw(10) << v[i].x << "|" << std::setw(10) << v[i].y << "|" << std::setw(15) << v[i].fit << "|" << std::setw(22) << fit_max << "|" << std::setw(17) << fit_mean << "|" << std::endl;
+				std::cout << "|" << std::setw(11) << "(исходное)" << "|" << std::fixed << std::setprecision(6) << std::setw(10) << v[i].x << "|" << std::setw(10) << v[i].y << "|" << std::setw(15) << v[i].fit << "|" << std::setw(22) << fit_max << "|" << std::setw(17) << fit_mean << "|" << std::setw(11) << "(исходное)" << "|" << std::endl;
 			}
 			else
 			{
-				std::cout << "|" << std::setw(12) << "|" << std::fixed << std::setprecision(6) << std::setw(10) << v[i].x << "|" << std::setw(10) << v[i].y << "|" << std::setw(15) << v[i].fit << "|" << std::setw(23) << "|" << std::setw(18) << "|" << std::endl;
+				std::cout << "|" << std::setw(12) << "|" << std::fixed << std::setprecision(6) << std::setw(10) << v[i].x << "|" << std::setw(10) << v[i].y << "|" << std::setw(15) << v[i].fit << "|" << std::setw(23) << "|" << std::setw(18) << "|" << std::setw(12) << "|" << std::endl;
 			}
 		}
 		else
 		{
 			if (i == 0)
 			{
-				std::cout << "|" << std::fixed << std::setprecision(0) << std::setw(11) << N << "|" << std::fixed << std::setprecision(6) << std::setw(10) << v[i].x << "|" << std::setw(10) << v[i].y << "|" << std::setw(15) << v[i].fit << "|" << std::setw(22) << fit_max << "|" << std::setw(17) << fit_mean << "|" << std::endl;
+				std::cout << "|" << std::fixed << std::setprecision(0) << std::setw(11) << N << "|" << std::fixed << std::setprecision(6) << std::setw(10) << v[i].x << "|" << std::setw(10) << v[i].y << "|" << std::setw(15) << v[i].fit << "|" << std::setw(22) << fit_max << "|" << std::setw(17) << fit_mean << "|" << std::setw(11) << flag_s << "|" << std::endl;
 			}
 			else
 			{
-				std::cout << "|" << std::setw(12) << "|" << std::fixed << std::setprecision(6) << std::setw(10) << v[i].x << "|" << std::setw(10) << v[i].y << "|" << std::setw(15) << v[i].fit << "|" << std::setw(23) << "|" << std::setw(18) << "|" << std::endl;
+				std::cout << "|" << std::setw(12) << "|" << std::fixed << std::setprecision(6) << std::setw(10) << v[i].x << "|" << std::setw(10) << v[i].y << "|" << std::setw(15) << v[i].fit << "|" << std::setw(23) << "|" << std::setw(18) << "|" << std::setw(12) << "|" << std::endl;
 			}
 		}
 	}
-	std::cout << "+-----------+----------+----------+---------------+----------------------+-----------------+" << std::endl;
+	std::cout << "+-----------+----------+----------+---------------+----------------------+-----------------+-----------+" << std::endl;
 }
 void genetic_algorithm()
 {
-	std::cout << "____________________________________________________________________________________________" << std::endl;
-	std::cout << "|" << std::setw(11) << "№ поколения" << "|" << std::setw(10) << "X" << "|" << std::setw(10) << "Y" << "|" << std::setw(15) << "FIT" << "|" << std::setw(22) << "Максимальный результат" << "|" << std::setw(17) << "Средний результат" << "|" << std::endl;
-	std::cout << "+-----------+----------+----------+---------------+----------------------+-----------------+" << std::endl;
+	std::cout << "________________________________________________________________________________________________________" << std::endl;
+	std::cout << "|" << std::setw(11) << "№ поколения" << "|" << std::setw(10) << "X" << "|" << std::setw(10) << "Y" << "|" << std::setw(15) << "FIT" << "|" << std::setw(22) << "Максимальный результат" << "|" << std::setw(17) << "Средний результат" << "|" << std::setw(11) << "Мутация" << "|" << std::endl;
+	std::cout << "+-----------+----------+----------+---------------+----------------------+-----------------+-----------+" << std::endl;
 	//Исходная популяция	
 	double sum_fit, max_fit;
 	sum_fit = 0;
@@ -116,8 +127,7 @@ void genetic_algorithm()
 		if (population[i].fit >= max_fit)
 			max_fit = population[i].fit;
 	}
-	print(population, 0, max_fit, sum_fit);
-	//
+	print(population, 0, max_fit, sum_fit, false);
 
 	std::vector<double> P(4);
 	std::vector<double> X(3);
@@ -137,7 +147,7 @@ void genetic_algorithm()
 		for (auto& pos : population)
 			sum_fit += pos.fit;
 
-		//Селекция 
+        //Селекция 
 		sum_P = 0;
 		for (int i = 0; i < population.size(); i++)
 		{
@@ -145,7 +155,7 @@ void genetic_algorithm()
 			sum_P += P[i];
 		}
 		random_P = Random(0, sum_P);
-		int position_ignore = 0;
+		position_ignore = 0;
 		for (int i = 0; i < 4; i++)
 		{
 			if (random_P <= P[i])
@@ -158,8 +168,7 @@ void genetic_algorithm()
 				P[i + 1] = P[i] + P[i + 1];
 			}
 		}
-
-		//Поиск максимального
+		//Поиск максимального значения fit 
 		if (position_ignore != 0)
 		{
 			fit_max = population[0].fit;
@@ -181,7 +190,7 @@ void genetic_algorithm()
 				}
 			}
 		}
-		//Скрещивание 
+		//Кроссовер
 		iter = 0;
 		for (int i = 0; i < population.size(); i++)
 		{
@@ -208,7 +217,6 @@ void genetic_algorithm()
 		population[2].y = Y[0];
 		population[3].x = X[2];
 		population[3].y = Y[0];
-
 		//Мутация
 		if (Random(0, 1) <= 0.25)
 		{
@@ -232,7 +240,7 @@ void genetic_algorithm()
 			if (population[i].fit >= max_fit)
 				max_fit = population[i].fit;
 		}
-		print(population, N, max_fit, sum_fit);
+		print(population, N, max_fit, sum_fit, flag);
 	}
 }
 int main()
